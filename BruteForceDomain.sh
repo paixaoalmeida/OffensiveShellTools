@@ -21,16 +21,20 @@ COR_VERMELHO="\e[31;1;4m \n"
 COR_YELLOW="\e[33;1m"
 
 MENSAGEM_DE_AJUDA="
-$(basename $0) - BruteForcDomain / MENU DE AJUDA
+TENHA O ARQUIVO listadns.txt para rodar o script!
+
+$(basename $0) - BruteForceDomain / MENU DE AJUDA
+
 MODO DE USO:
 $0 -a URL sem o WWW (Faz brute force de subdominios)
+
 $0 -s URL sem o WWW (Faz brute force de subdominios mas usando os registros CNAMES)
 
 By WhiteRose / github.com/paixaoalmeida
 "
 #-------------------------------------------------------------------------------
 if [ $1 =  ];then          #if for the script
-  echo $MENSAGEM_DE_AJUDA
+  echo "$MENSAGEM_DE_AJUDA"
 elif [ $1 = "-a" ];then
   while read sub;do
     if host $sub.$domain &> /dev/null;then          #comand host and default output
