@@ -13,7 +13,11 @@
 #Menu de ajuda, menu se der algum parametro inválido e também quando não houver parametro
 #Alguns ajustes estéticos da saída do programa forama ajustados
 #Coloquei delay no scan popular para tentar evitar bloqueio por ip (v1.0)
-#Esse script tbm está no repositório "RosePortScan"!!
+
+#Dia 14 de junho #Produção da versão v1.1 (começo)
+#Adicionei validacao do pacote hping3 (necessário para rodar o programa)
+#Validação de root para rodar o scan
+#Nova Message help (Novo git agora só quando a v1.1 estiver completa!)
 
 #-----------------------------------------------------------------------------------------
 
@@ -67,11 +71,41 @@ MENSAGEM_HELP_INVALIDO="
   > By:Whiterose / Github.com/paixaoalmeida               <
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 "
-
+MENSAGEM_HELP_HPING="
+  VOCÊ NÃO TEM O PACOTE hping3 instalado!
+  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  >      SCAN DE PORTAS TCP POPULARES!                    <
+  >      $(basename $0)                                   <
+  >                                                       <
+  >                                                       <
+  >      .......                                          <
+  >      .     .         .......         SCAN             <
+  >      ....... ......  .    .   ......                  < ---------> MODOO DE USO
+  >      .       .    .  .   .      .                     <
+  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares E com delay)
+  >                                                       <
+  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP e sem delay)
+  > --> INSTALE O PACOTE hping3 | sudo apt install hping3 <
+  > --> Ou qualquer outro instalador do seu sistema! <--- <
+  >                                                       <
+  > By:Whiterose / Github.com/paixaoalmeida               <
+  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+"
 
 
 #------------------------------------------------------------------------------------------------
-#CÓDIGO DO PROGRAMA
+#VERIFICACOES DO PROGRAMA
+
+if [ ! "$(which hping3)" == /usr/sbin/hping3 ]; then            #hping3 está instalado?
+  echo "$MENSAGEM_HELP_HPING"
+  exit 1
+elif [ ! "$(id -u)" == 0 ]; then                                #está rodando como root?
+  echo -e ${COR_BRANCO}"A PARTE DO SCAN SÓ FUNCIONA RODANDO COMO ROOT! APERTE SUDO! \e[m \n"
+  exit 1
+fi 
+
+#----------------------------------------------------------------------------------------------------
+
 case "$1" in
   -h) echo "$MENSAGEM_HELP"                                                         && exit 0                         ;;
 
@@ -79,15 +113,16 @@ case "$1" in
         while read portas;do
           if [ $(hping3 -S -p $portas -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 6 | cut -d = -f 2) ];then
             echo -e ${COR_VERMELHO}"Porta $portas ABERTA no host com"${COR_AMARELO} "IP $2 \n"
-            sleep 15    #Para tentar evitar ser bloqueado
+            sleep 10             #Sleep para tentar evitar bloqueio
           fi
         done < portas.txt                                                           && exit 0                         ;;
 
   -l) for ip in $(seq 1 65536);do
     if [ $(hping3 -S -p $ip -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 2 | cut -d = -f 2) ];then
       echo -e ${COR_VERMELHO}"Porta $ip ABERTA no host com"${COR_AMARELO} "IP $2 \n"
-    fi
+    fi                          #Full port-scan, com todas as portas  TCP
   done                                                                              && exit 0                         ;;
 
-   *) echo "$MENSAGEM_HELP_INVALIDO"                                                && exit 1                         ;;
+
+  *) echo "$MENSAGEM_HELP_INVALIDO"                                                 && exit 1                         ;;
 esac
