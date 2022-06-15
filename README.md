@@ -5,21 +5,21 @@
 
   
   
-  ## Repositório com algumas ferramentas de Pentest | Fase de reconhecimento | Shell Script
+  ##  Repository with some Pentest tools | Recognition phase | shell script 
   
-  ## A única demanda será copiar as listas que são usadas nos scripts para o diretório principal dos scripts
+  ## The only demand will be to copy the lists that are used in the scripts to the main directory of the scripts
   
-  ## Todos são funcionais, mas estão sendo feitas melhorias, como:
+  ## All are functional, but improvements are being made, such as: 
   
-  ### -Melhor saída das respostas
+  #### -Best and more organized outputs in the scripts
   
-  ### -Melhor desempenho
+  #### -Better performance
   
-  ### -Menu de ajuda, alterações do design dos scritps
+  #### -Help Menus, scripts design chances (make them prettier)
   
-  ### -Estou trabalhando nisso enquanto evoluo nos meus estudos!
+  #### -I'm working on it as I progress in my studies 
   
   
   
-  ### QUALQUER CONTRIBUIÇÃO NOS CÓDIGOS SERÁ BEM VINDA!
+  ### ANY HELP WITH THE CODES I WOULD BE VERY THANKFULL!
 
