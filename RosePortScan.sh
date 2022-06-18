@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #dia 24 de maio ás 11:18
 #Script que analisa portas populares de um host na internet com uma lista
 #Pode ser feito direto no bash sem IDE, mas eu gosto de documentar tudo e deixar colorido rs
@@ -17,34 +18,34 @@
 #Dia 14 de junho #Produção da versão v1.1 (começo)
 #Adicionei validacao do pacote hping3 (necessário para rodar o programa)
 #Validação de root para rodar o scan
-#Nova Message help (Novo git agora só quando a v1.1 estiver completa!)
+#Nova Message help
 
+#Dia 16: Começo de verdade do novo código e versao v1.1
+#Diversas alterações no código para torna-lo mais versátil e "enxuto"
+#Adicionado banner grabbing (simples e não tão intuitivo, mas funciona bem)
+#Modificação quase que inteira do código
+#Abaixei o delay, pois syn scan não completa conexão (havia me esquecido disso)
+#Apaga todo o lixo do diretório do usuário após o scan e saídas do script
 #-----------------------------------------------------------------------------------------
 
 #VARIAVEIS
-
-COR_VERMELHO="\e[31;1m"
-
-COR_AMARELO="\e[33;1m"
-
-COR_BRANCO="\e[37;1;5m"
 
 MENSAGEM_HELP="
 
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   >      SCAN DE PORTAS TCP POPULARES!                    <
-  >      $(basename $0)                               <
+  >      $(basename $0)                                  <
   >                                                       <
   >                                                       <
   >      .......                                          < ---> MENU DE AJUDA! VEJA O MODO DE USO ABAIXO!
   >      .     .         .......         SCAN             <
   >      ....... ......  .    .   ......                  < ---------> MODOO DE USO
   >      .       .    .  .   .      .                     <
-  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares E com delay)
+  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares | Banner Grabbing)
   >                                                       <
-  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP e sem delay)
+  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP | SYN scan)
   >                                                       <
-  >      v1.0 (05/06/22)                                  <
+  >      v1.1 (18/06/22)                                  <
   >                                                       <
   > By:Whiterose / Github.com/paixaoalmeida               <
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -55,16 +56,16 @@ MENSAGEM_HELP_INVALIDO="
 
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   >      SCAN DE PORTAS TCP POPULARES!                    <
-  >      $(basename $0)                               <
+  >      $(basename $0)                                  <
   >                                                       <
   >                                                       <
   >      .......                                          <
   >      .     .         .......         SCAN             <
   >      ....... ......  .    .   ......                  < ---------> MODOO DE USO
   >      .       .    .  .   .      .                     <
-  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares E com delay)
+  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares | Banner Grabbing)
   >                                                       <
-  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP e sem delay)
+  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP | SYN scan)
   > --->   PARAMETRO INVÁLIDO! VEJA O MODO DE USO!   <--- <
   >                                                       <
   >                                                       <
@@ -75,16 +76,16 @@ MENSAGEM_HELP_HPING="
   VOCÊ NÃO TEM O PACOTE hping3 instalado!
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   >      SCAN DE PORTAS TCP POPULARES!                    <
-  >      $(basename $0)                                   <
+  >      $(basename $0)                                  <
   >                                                       <
   >                                                       <
   >      .......                                          <
   >      .     .         .......         SCAN             <
   >      ....... ......  .    .   ......                  < ---------> MODOO DE USO
   >      .       .    .  .   .      .                     <
-  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares E com delay)
+  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares | Banner Grabbing)
   >                                                       <
-  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP e sem delay)
+  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP | SYN scan)
   > --> INSTALE O PACOTE hping3 | sudo apt install hping3 <
   > --> Ou qualquer outro instalador do seu sistema! <--- <
   >                                                       <
@@ -92,37 +93,75 @@ MENSAGEM_HELP_HPING="
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 "
 
+COR_SERV="\e[37;4;1m"
+COR_VERMELHO="\e[31;1m"
+COR_AMARELO="\e[33;1m"
+COR_BRANCO="\e[37;1;5m"
+SCAN_WA="A PARTE DO SCAN SÓ FUNCIONA RODANDO COMO ROOT! APERTE SUDO! \e[m \n"
+CHAVE=0
+CHAVE_1=0
+CHAVE_2=0
+CHAVE_3=0
+CHAVE_4=0
+ARQ="res.txt"
 
 #------------------------------------------------------------------------------------------------
 #VERIFICACOES DO PROGRAMA
 
-if [ ! "$(which hping3)" == /usr/sbin/hping3 ]; then            #hping3 está instalado?
-  echo "$MENSAGEM_HELP_HPING"
-  exit 1
-elif [ ! "$(id -u)" == 0 ]; then                                #está rodando como root?
-  echo -e ${COR_BRANCO}"A PARTE DO SCAN SÓ FUNCIONA RODANDO COMO ROOT! APERTE SUDO! \e[m \n"
-  exit 1
-fi 
+[ ! -e /usr/sbin/hping3 ] && echo "$MENSAGEM_HELP_HPING" && exit 1  #hping3 instalado?
+[ ! "$(id -u)" = 0 ] && printf "${COR_BRANCO}$SCAN_WA" && exit 1    #Está rodando como root? Necessário!
 
 #----------------------------------------------------------------------------------------------------
+#CÓDIGO DO PROGRAMA
 
+#case e chaves valores para ativação dos códigos
 case "$1" in
-  -h) echo "$MENSAGEM_HELP"                                                         && exit 0                         ;;
+   -a) CHAVE=1 && CHAVE_2=1 && CHAVE_3=1 && CHAVE_4=1                                           ;;
 
-  -a) echo -e ${COR_BRANCO}"OBS: ESSE MODO DO SCAN TEM DELAY PARA TENTAR EVITAR BLOQUEIO POR IP! \e[m \n"
-        while read portas;do
-          if [ $(hping3 -S -p $portas -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 6 | cut -d = -f 2) ];then
-            echo -e ${COR_VERMELHO}"Porta $portas ABERTA no host com"${COR_AMARELO} "IP $2 \n"
-            sleep 10             #Sleep para tentar evitar bloqueio
-          fi
-        done < portas.txt                                                           && exit 0                         ;;
+   -l) CHAVE_1=1                                                                                ;;
 
-  -l) for ip in $(seq 1 65536);do
-    if [ $(hping3 -S -p $ip -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 2 | cut -d = -f 2) ];then
-      echo -e ${COR_VERMELHO}"Porta $ip ABERTA no host com"${COR_AMARELO} "IP $2 \n"
-    fi                          #Full port-scan, com todas as portas  TCP
-  done                                                                              && exit 0                         ;;
+   -h) echo "$MENSAGEM_HELP"                                                     && exit 0      ;;
 
-
-  *) echo "$MENSAGEM_HELP_INVALIDO"                                                 && exit 1                         ;;
+    *) echo "$MENSAGEM_HELP_INVALIDO"                                            && exit 1      ;;
 esac
+
+#---------------------------------------------------------------------------------------------------------
+#EXECUÇÕES DO PROGRAMA
+
+#função -a
+[ $CHAVE -eq 1 ] && echo -e ${COR_BRANCO}"ESCANEANDO PORTAS NO HOST ALVO! \e[m \n"
+      while read portas;do
+        if [ $(hping3 -S -p $portas -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 6 | cut -d = -f 2) ];then
+          echo -e ${COR_VERMELHO}"Porta $portas ABERTA no host com"${COR_AMARELO} "IP $2 \e[m \n" | tee -a res.txt
+          sleep 2             #Scan portas TCP populares | Syn scan
+        fi
+      done < portas.txt
+echo
+echo -e ${COR_SERV}"Serviços encontrados nas portas acima:\e[m \n"
+
+#Formatação do arquivo para execução do banner grabbing via netcat
+[ $CHAVE_2 -eq 1 ] && cut -d " " -f2 res.txt > res1.txt && rm res.txt
+
+
+#Formatação de saída dos arquivos para o banner grabbing via netcat
+{
+[ $CHAVE_3 -eq 1 ] && for por in $(cat res1.txt);do nc -v -w 3 $2 $por;done >> serv.txt
+} &> /dev/null
+
+while read linha; do
+  echo "$linha"
+  echo
+done < serv.txt
+
+
+#Limpar diretório do usuário
+[ $CHAVE_4 -eq 1 ] && rm serv.txt && rm res1.txt && exit 0
+
+
+#função -l
+[ $CHAVE_1 -eq 1 ] && for ip in $(seq 1 65536);do
+  if [ $(hping3 -S -p $ip -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 2 | cut -d = -f 2) ];then
+    echo -e ${COR_VERMELHO}"Porta $ip ABERTA no host com"${COR_AMARELO} "IP $2 \n"
+  fi                          #Full port-scan, com todas as portas  TCP
+done
+exit 0
