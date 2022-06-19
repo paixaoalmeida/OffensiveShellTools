@@ -7,7 +7,16 @@
 #Script funcional, não sei se dá para fazer mais do que isso sinceramente, funciona perfeitamente
 #Não tem para que enfeitar ele
 
+#Dia 19 de junho
+#Alterações na estrutura do código
+#Alterações no design
+
 #----------------------------------------------------------------------------------------------------
+#VARIAVEIS
+
+COR_YELLOW="\e[33;1m"
+CHAVE=0
+
 MENSAGEM_USO="
 $(basename $0) - DnsZoneTransfer / MENU DE AJUDA
 
@@ -16,11 +25,17 @@ $(basename $0) - DnsZoneTransfer / MENU DE AJUDA
 O script verifica os ns e tenta uma tranferência de zona
 "
 #---------------------------------------------------------------------------------------------------
+#CÓDIGO DO PROGRAMA
 
-if [ $1 =  ];then
-  echo $MENSAGEM_USO
-elif [ $1 = "-a" ];then
-  for servers in $(host -t ns $2 | cut -d " " -f4);do host -l -a $2 $servers;done
-fi
+case "$1" in
+  -h) echo "$MENSAGEM_USO"                   ;;
+  -a) CHAVE=1                                ;;
+   *) echo "PARAMETRO INVÁLIDO! DIGITE -h"   ;;
+esac
 
-exit 0
+#------------------------------------------------------------------------------------------------------
+#EXECUÇÕES DO PROGRAMA
+
+[ $CHAVE -eq 1 ] &&
+echo -e ${COR_YELLOW}"Consultando os ns e tentando uma transferência de zona... \e[m \n"
+for servers in $(host -t ns $2 | cut -d " " -f4);do host -l -a $2 $servers;done
