@@ -6,6 +6,7 @@
   
   
   ##  Repository with some Pentest tools | Recognition phase | shell script 
+  # MANUTENÇÃO TEMPORÁRIA DOS CÓDIGOS, REPOSITÓRIO FECHADO
   
   ## The only demand will be to copy the lists that are used in the scripts to the main directory of the scripts
   
