@@ -18,6 +18,9 @@
 #Alguns ajustes de design e técnicos
 #Está totalmente funcional
 
+#Dia 26 de Junho
+#Problemas detectados no código, será feito a manutenção
+
 #-------------------------------------------------------------------------------------------------------------
 #VARIÁVEIS
 
