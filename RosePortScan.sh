@@ -26,29 +26,60 @@
 #Modificação quase que inteira do código
 #Abaixei o delay, pois syn scan não completa conexão (havia me esquecido disso)
 #Apaga todo o lixo do diretório do usuário após o scan e saídas do script
-#-----------------------------------------------------------------------------------------
 
+#Dia 23: Adicionado menu e função de abortar com CTRL+C
+#-----------------------------------------------------------------------------------------
 #VARIAVEIS
+
+__PortMessage__() {
+echo -e ${COR_VERMELHO}"___________________________________________________________________________________________________________\n"
+
+
+
+echo -e ${COR_AMARELO}  "██████╗░░█████╗░░██████╗███████╗  ██████╗░░█████╗░██████╗░████████╗  ░██████╗░█████╗░░█████╗░███╗░░██╗"
+echo -e ${COR_VERMELHO} "██╔══██╗██╔══██╗██╔════╝██╔════╝  ██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝  ██╔════╝██╔══██╗██╔══██╗████╗░██║"
+echo -e ${COR_ROSA}     "██████╔╝██║░░██║╚█████╗░█████╗░░  ██████╔╝██║░░██║██████╔╝░░░██║░░░  ╚█████╗░██║░░╚═╝███████║██╔██╗██║"
+echo -e ${COR_VERDE}    "██╔══██╗██║░░██║░╚═══██╗██╔══╝░░  ██╔═══╝░██║░░██║██╔══██╗░░░██║░░░  ░╚═══██╗██║░░██╗██╔══██║██║╚████║"
+echo -e ${COR_AZUL}     "██║░░██║╚█████╔╝██████╔╝███████╗  ██║░░░░░╚█████╔╝██║░░██║░░░██║░░░  ██████╔╝╚█████╔╝██║░░██║██║░╚███║"
+
+echo -e ${COR_VERMELHO}"___________________________________________________________________________________________________________\n"
+
+}
 
 MENSAGEM_HELP="
 
-  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  >      SCAN DE PORTAS TCP POPULARES!                    <
-  >      $(basename $0)                                  <
-  >                                                       <
-  >                                                       <
-  >      .......                                          < ---> MENU DE AJUDA! VEJA O MODO DE USO ABAIXO!
-  >      .     .         .......         SCAN             <
-  >      ....... ......  .    .   ......                  < ---------> MODOO DE USO
-  >      .       .    .  .   .      .                     <
-  >      .       ......  .    ..    .                     < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares | Banner Grabbing)
-  >                                                       <
-  >                                                       < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP | SYN scan)
-  >                                                       <
-  >      v1.1 (18/06/22)                                  <
-  >                                                       <
-  > By:Whiterose / Github.com/paixaoalmeida               <
-  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+██████╗░░█████╗░░██████╗███████╗  ██████╗░░█████╗░██████╗░████████╗  ░██████╗░█████╗░░█████╗░███╗░░██╗
+██╔══██╗██╔══██╗██╔════╝██╔════╝  ██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝  ██╔════╝██╔══██╗██╔══██╗████╗░██║
+██████╔╝██║░░██║╚█████╗░█████╗░░  ██████╔╝██║░░██║██████╔╝░░░██║░░░  ╚█████╗░██║░░╚═╝███████║██╔██╗██║
+██╔══██╗██║░░██║░╚═══██╗██╔══╝░░  ██╔═══╝░██║░░██║██╔══██╗░░░██║░░░  ░╚═══██╗██║░░██╗██╔══██║██║╚████║
+██║░░██║╚█████╔╝██████╔╝███████╗  ██║░░░░░╚█████╔╝██║░░██║░░░██║░░░  ██████╔╝╚█████╔╝██║░░██║██║░╚███║
+╚═╝░░╚═╝░╚════╝░╚═════╝░╚══════╝  ╚═╝░░░░░░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░  ╚═════╝░░╚════╝░╚═╝░░╚═╝╚═╝░░╚══╝
+
+  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  >      SCAN DE PORTAS TCP POPULARES!          <
+  >      $(basename $0)                         <
+  >                                             <
+  >                  ╱╱╱╱╱╱╭╮                   <
+  >                  ╱╱╱╱╱╭╯╰╮                  <
+  >                  ╭━━┳━┻╮╭╯                  <
+  >                  ┃━━┫┃━┫┃                   <
+  >                  ┣━━┃┃━┫╰╮                  <
+  >                  ╰━━┻━━┻━╯                  <
+  >                   ╭╮╭┳━━╮                   < ---> MENU DE AJUDA! VEJA O MODO DE USO ABAIXO!
+  >                   ┃┃┃┃━━┫                   <
+  >                   ┃╰╯┣━━┃                   < ---------> MODOO DE USO
+  >                   ╰━━┻━━╯                   <
+  >                 ╱╭━╮                        < ---> PopularTcpPorts.sh -a [ipdohost] (Scan portas TCP populares | Banner Grabbing)
+  >                 ╱┃╭╯                        <
+  >                 ╭╯╰┳━┳━━┳━━╮                < ---> PopularTcpPorts.sh -l [ipdohost] (Scan de todas as portas TCP | SYN scan)
+  >                 ╰╮╭┫╭┫┃━┫┃━┫                <
+  >                 ╱┃┃┃┃┃┃━┫┃━┫                <
+  >                ╱╰╯╰╯╰━━┻━━╯                 <
+  >                                             <
+  >               v1.1 (18/06/22)               <
+  >   By:Whiterose / Github.com/paixaoalmeida   <
+  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 "
 
@@ -97,16 +128,26 @@ COR_SERV="\e[37;4;1m"
 COR_VERMELHO="\e[31;1m"
 COR_AMARELO="\e[33;1m"
 COR_BRANCO="\e[37;1;5m"
+COR_ROSA="\e[35;1m"
+COR_VERDE="\e[32;1m"
+COR_AZUL="\e[34;1m"
+END='\033[m'
 SCAN_WA="A PARTE DO SCAN SÓ FUNCIONA RODANDO COMO ROOT! APERTE SUDO! \e[m \n"
-CHAVE=0
 CHAVE_1=0
 CHAVE_2=0
 CHAVE_3=0
 CHAVE_4=0
-ARQ="res.txt"
 
 #------------------------------------------------------------------------------------------------
 #VERIFICACOES DO PROGRAMA
+
+#Sair do programa com CTRL+C
+trap __Ctrl_c__ INT
+
+__Ctrl_c__() {
+    echo -e ${COR_AMARELO}"Ação abortada!"
+    exit 1
+}
 
 [ ! -e /usr/sbin/hping3 ] && echo "$MENSAGEM_HELP_HPING" && exit 1  #hping3 instalado?
 [ ! "$(id -u)" = 0 ] && printf "${COR_BRANCO}$SCAN_WA" && exit 1    #Está rodando como root? Necessário!
@@ -116,20 +157,24 @@ ARQ="res.txt"
 
 #case e chaves valores para ativação dos códigos
 case "$1" in
-   -a) CHAVE=1 && CHAVE_2=1 && CHAVE_3=1 && CHAVE_4=1                                           ;;
+  -l) __PortMessage__
+  echo -e ${COR_BRANCO}"ESCANEANDO TODAS AS PORTAS DO HOST ALVO! \e[m \n"
+  for ip in $(seq 1 65536);do
+    if [ $(hping3 -S -p $ip -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 2 | cut -d = -f 2) ];then
+      echo -e ${COR_VERMELHO}"Porta $ip ABERTA no host com"${COR_AMARELO} "IP $2 \n"
+    fi                          #Full port-scan, com todas as portas  TCP
+  done                                                                                                       ;;
 
-   -l) CHAVE_1=1                                                                                ;;
-
-   -h) echo "$MENSAGEM_HELP"                                                     && exit 0      ;;
-
-    *) echo "$MENSAGEM_HELP_INVALIDO"                                            && exit 1      ;;
+  -a) CHAVE_1=1 && CHAVE_2=1 && CHAVE_3=1 && CHAVE_4=1                                                       ;;
+  -h) echo "$MENSAGEM_HELP" && exit 0                                                                        ;;
+   *) echo "$MENSAGEM_HELP_INVALIDO" && exit 1                                                               ;;
 esac
 
 #---------------------------------------------------------------------------------------------------------
 #EXECUÇÕES DO PROGRAMA
 
 #função -a
-[ $CHAVE -eq 1 ] && echo -e ${COR_BRANCO}"ESCANEANDO PORTAS NO HOST ALVO! \e[m \n"
+[ $CHAVE_1 -eq 1 ] && __PortMessage__ && echo -e ${COR_BRANCO}"ESCANEANDO PORTAS NO HOST ALVO! \e[m \n"
       while read portas;do
         if [ $(hping3 -S -p $portas -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 6 | cut -d = -f 2) ];then
           echo -e ${COR_VERMELHO}"Porta $portas ABERTA no host com"${COR_AMARELO} "IP $2 \e[m \n" | tee -a res.txt
@@ -138,6 +183,7 @@ esac
       done < portas.txt
 echo
 echo -e ${COR_SERV}"Serviços encontrados nas portas acima:\e[m \n"
+
 
 #Formatação do arquivo para execução do banner grabbing via netcat
 [ $CHAVE_2 -eq 1 ] && cut -d " " -f2 res.txt > res1.txt && rm res.txt
@@ -148,7 +194,7 @@ echo -e ${COR_SERV}"Serviços encontrados nas portas acima:\e[m \n"
 [ $CHAVE_3 -eq 1 ] && for por in $(cat res1.txt);do nc -v -w 3 $2 $por;done >> serv.txt
 } &> /dev/null
 
-while read linha; do
+while read -r linha; do
   echo "$linha"
   echo
 done < serv.txt
@@ -156,12 +202,3 @@ done < serv.txt
 
 #Limpar diretório do usuário
 [ $CHAVE_4 -eq 1 ] && rm serv.txt && rm res1.txt && exit 0
-
-
-#função -l
-[ $CHAVE_1 -eq 1 ] && for ip in $(seq 1 65536);do
-  if [ $(hping3 -S -p $ip -c 1 $2 2> /dev/null | grep flags=SA | cut -d " " -f 2 | cut -d = -f 2) ];then
-    echo -e ${COR_VERMELHO}"Porta $ip ABERTA no host com"${COR_AMARELO} "IP $2 \n"
-  fi                          #Full port-scan, com todas as portas  TCP
-done
-exit 0
