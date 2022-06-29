@@ -18,9 +18,9 @@
 #Alguns ajustes de design e técnicos
 #Está totalmente funcional
 
-#Dia 26 de Junho
-#Problemas detectados no código, será feito a manutenção
-
+#Dia 29 de Junho
+#Havia um bug no código - arrumado
+#Novo banner, nova formatação do stdout
 #-------------------------------------------------------------------------------------------------------------
 #VARIÁVEIS
 
@@ -37,15 +37,34 @@ Necessário uma lista para realizar o brute force (listadns.txt) na pasta 'lista
 By WhiteRose / github.com/paixaoalmeida
 "
 
+__PortMessage__() {
+echo -e ${COR_ROSA}"╭╮╱╱╱╱╱╱╭╮╱╱╱╱╱╭━╮╱╱╱╱╱╱╱╱╱╱╱╱╱╭╮"
+echo "┃┃╱╱╱╱╱╭╯╰╮╱╱╱╱┃╭╯╱╱╱╱╱╱╱╱╱╱╱╱╱┃┃"
+echo "┃╰━┳━┳╮┣╮╭╋━━╮╭╯╰┳━━┳━┳━━┳━━╮╭━╯┣━━┳╮╭┳━━┳┳━╮"
+echo "┃╭╮┃╭┫┃┃┃┃┃┃━┫╰╮╭┫╭╮┃╭┫╭━┫┃━┫┃╭╮┃╭╮┃╰╯┃╭╮┣┫╭╮╮"
+echo "┃╰╯┃┃┃╰╯┃╰┫┃━┫╱┃┃┃╰╯┃┃┃╰━┫┃━┫┃╰╯┃╰╯┃┃┃┃╭╮┃┃┃┃┃"
+echo "╰━━┻╯╰━━┻━┻━━╯╱╰╯╰━━┻╯╰━━┻━━╯╰━━┻━━┻┻┻┻╯╰┻┻╯╰╯"
+echo
+}
+
 domain=$2
 CHAVE=0
-CHAVE_1=0
 
-COR_VERMELHO="\e[31;1;4m \n"
-COR_YELLOW="\e[33;1m"
+COR_ROSA="\e[37;1m"
+COR_VERMELHO="\e[31;1m"
+COR_YELLOW="\e[33;1;4m"
 
 #------------------------------------------------------------------------------------------------------------
 #VERIFICAÇÕES DO PROGRAMA
+
+#Sair do script com CTRL+C
+trap __Ctrl_c__ INT
+
+__Ctrl_c__() {
+    echo -e ${COR_AMARELO}"Ação abortada!"
+    exit 1
+}
+
 
 [ ! -e /usr/bin/host ] && echo "Instala o pacote net-tools na sua distribuição Linux!" #net tools instalado?
 [ ! -e listadns.txt ] && echo "Você está com a lista para bruteforce nesse diretório?" #A lista está no diretório?
@@ -53,26 +72,25 @@ COR_YELLOW="\e[33;1m"
 #---------------------------------------------------------------------------------------------------------------------
 #CÓDIGO DO PROGRAMA
 
+#Case com chaves de ativação e funções -s, -a e -h
 case "$1" in
-  -h) echo "$MENSAGEM_DE_AJUDA"               ;;
-  -a) CHAVE=1                                 ;;
-  -s) CHAVE_1=1                               ;;
-   *) echo "PARAMETRO INVÁLIDO! DIGITE -h"    ;;
+  -s) __PortMessage__
+      echo -e ${COR_YELLOW}"Bruteforce dos subdomínios e consultando registros CNAME \e[m \n"
+      for dns in $(cat listadns.txt);do host -t cname $dns.$domain;done | grep "alias for"                                                                                                ;;
+
+  -a) CHAVE=1                                                                                       ;;
+  -h) echo "$MENSAGEM_DE_AJUDA" && exit 0                                                           ;;
+   *) echo "PARAMETRO INVÁLIDO! DIGITE -h" && exit 1                                                ;;
 esac
 
 #----------------------------------------------------------------------------------------------------------------------
 #EXECUÇÕES DO PROGRAMA
 
 #Bruteforce dos subdominios (-a)
-[ $CHAVE -eq 1 ] &&
-echo -e ${COR_YELLOW}"Realizando Bruteforce nos subdomínios do alvo... \e[m \n"
+[ $CHAVE -eq 1 ] && __PortMessage__
+echo -e ${COR_YELLOW}"Realizando Bruteforce nos subdomínios do alvo \e[m \n"
 while read sub;do
   if host $sub.$domain &> /dev/null;then
-    echo -e ${COR_VERMELHO} "Dominios encontrados:" ${COR_YELLOW}"$sub.$domain";
+    echo -e ${COR_VERMELHO}"Dominio encontrado:\e[m" $sub.$domain
   fi
 done < listadns.txt
-
-#Bruteforce dos subdomínios com consulta de registros CNAME
-[ $CHAVE_1 -eq 1 ] &&
-echo -e ${COR_YELLOW}"Bruteforce dos subdomínios e consultando registros CNAME... \e[m \n"
-for dns in $(cat listadns.txt);do host -t cname $dns.$domain;done | grep "alias for" #Filtrando apenas cons. válidas
