@@ -28,6 +28,9 @@
 #Apaga todo o lixo do diretório do usuário após o scan e saídas do script
 
 #Dia 23: Adicionado menu e função de abortar com CTRL+C
+
+#Dia 28: Se não houver serviços nas portas, há uma mensagem de "sem serviço"
+
 #-----------------------------------------------------------------------------------------
 #VARIAVEIS
 
@@ -124,6 +127,7 @@ MENSAGEM_HELP_HPING="
   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 "
 
+COR_SERV1="\e[37;1m"
 COR_SERV="\e[37;4;1m"
 COR_VERMELHO="\e[31;1m"
 COR_AMARELO="\e[33;1m"
@@ -131,7 +135,6 @@ COR_BRANCO="\e[37;1;5m"
 COR_ROSA="\e[35;1m"
 COR_VERDE="\e[32;1m"
 COR_AZUL="\e[34;1m"
-END='\033[m'
 SCAN_WA="A PARTE DO SCAN SÓ FUNCIONA RODANDO COMO ROOT! APERTE SUDO! \e[m \n"
 CHAVE_1=0
 CHAVE_2=0
@@ -197,8 +200,12 @@ echo -e ${COR_SERV}"Serviços encontrados nas portas acima:\e[m \n"
 while read -r linha; do
   echo "$linha"
   echo
-done < serv.txt
+done < serv.txt 
 
+#Se não houver linhas no arquivo, sem serviço nas portas
+if [ "$(wc -l serv.txt)" = "0 serv.txt" ]; then
+  echo -e ${COR_SERV1}"Nenhm serviço encontrado nas portas acima! Tente manualmente!"
+fi
 
 #Limpar diretório do usuário
 [ $CHAVE_4 -eq 1 ] && rm serv.txt && rm res1.txt && exit 0
